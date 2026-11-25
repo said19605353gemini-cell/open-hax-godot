@@ -181,8 +181,13 @@ static func compute_input(
 		desired = Vector2(pred_x, pred_y) + gdir * app
 		var wrong_side := (ppos.x < pred_x + 2.0) if is_blue else (ppos.x > pred_x - 2.0)
 		if wrong_side and absf(ppos.y - pred_y) < 36.0:
-			var side := -1.0 if ppos.y < pred_y else 1.0
+			var side := float(bot.get("avoid_side", 0.0))
+			if side == 0.0 or absf(ppos.y - pred_y) > 6.0:
+				side = -1.0 if ppos.y < pred_y else 1.0
+				bot["avoid_side"] = side
 			desired = Vector2(pred_x + (48.0 if is_blue else -48.0), pred_y + side * 50.0)
+		else:
+			bot["avoid_side"] = 0.0
 
 	for mate in teammates:
 		var diff := desired - (mate["pos"] as Vector2)

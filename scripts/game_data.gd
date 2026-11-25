@@ -4,8 +4,14 @@ const SETTINGS_PATH := "user://openhax_settings.cfg"
 const PROFILE_PATH := "user://openhax_profile.json"
 
 const BOT_DIFFICULTIES := ["very_easy", "easy", "medium", "hard", "pro"]
-const GRASS_THEMES := ["hd_stadium", "arena_pro", "night_neon", "retro_arcade", "flat"]
+const GRASS_THEMES := ["standard", "hd_stadium", "arena_pro", "night_neon", "retro_arcade", "flat"]
 const POWERUP_TYPES := ["hawk", "fire", "speed", "magnet", "giant"]
+const COUNTRIES := [
+	"TR", "AZ", "DE", "GB", "US", "FR", "ES", "IT", "PT", "BR", "AR", "NL", "BE",
+	"PL", "RU", "UA", "RO", "BG", "GR", "SE", "NO", "DK", "FI", "CH", "AT", "CZ",
+	"HU", "RS", "HR", "BA", "AL", "MK", "GE", "KZ", "UZ", "KG", "TM", "JP", "KR",
+	"CN", "IN", "ID", "SA", "AE", "EG", "MA", "DZ", "CA", "MX", "CL", "CO", "AU"
+]
 
 const LANGUAGES := {
 	"tr": {
@@ -203,9 +209,36 @@ var settings := {
 	"sound_volume": 0.65,
 	"bot_difficulty": "medium",
 	"physics_profile": "openhax",
+	"physics_hz": 60,
 	"stadium": "classic",
-	"resolution_scale": 1.0
+	"resolution_scale": 1.0,
+	"show_fps_hud": true,
+	"show_avatars": true,
+	"show_chat_indicators": true,
+	"custom_team_colors": true,
+	"kick_flash": true,
+	"pause_on_blur": false,
+	"chat_opacity": 0.85,
+	"custom_physics_enabled": false,
+	"custom_ball_control": 90.0,
+	"custom_ball_damping": 0.9915,
+	"custom_kick_power": 5.4,
+	"custom_player_speed": 3.33,
+	"custom_wall_bounce": 0.78,
+	"is_member": false,
+	"fav_stadium": "classic",
+	"fav_mode": "openhax"
 }
+
+var powerups_enabled := {
+	"hawk": true,
+	"fire": true,
+	"speed": true,
+	"magnet": true,
+	"giant": true
+}
+
+var debug_logs: Array[String] = []
 
 var profile := {
 	"goals": 0,
@@ -215,6 +248,76 @@ var profile := {
 	"matches": 0,
 	"play_seconds": 0
 }
+
+func log_debug(level: String, msg: String) -> void:
+	var ts := Time.get_time_string_from_system()
+	debug_logs.append("[%s] [%s] %s" % [ts, level.to_upper(), msg])
+	if debug_logs.size() > 250:
+		debug_logs.pop_front()
+
+func get_time_badge(play_sec: int) -> Dictionary:
+	if play_sec >= 36000:
+		return {"icon": "👑", "label": "Kral (10s+)"}
+	if play_sec >= 18000:
+		return {"icon": "💎", "label": "Elmas (5s+)"}
+	if play_sec >= 3600:
+		return {"icon": "🥇", "label": "Altın (1s+)"}
+	if play_sec >= 1800:
+		return {"icon": "🥈", "label": "Gümüş (30dk+)"}
+	if play_sec >= 300:
+		return {"icon": "🥉", "label": "Bronz (5dk+)"}
+	return {"icon": "🌱", "label": "Çaylak"}
+
+func apply_perf_preset(preset_id: String) -> void:
+	match preset_id:
+		"ultra_hd":
+			settings["fps_limit"] = 0
+			settings["grass_detail"] = "hd_stadium"
+			settings["shadows"] = true
+			settings["particles"] = true
+			settings["ball_trail"] = true
+			settings["perf_boost"] = false
+			settings["resolution_scale"] = 1.5
+		"balanced":
+			settings["fps_limit"] = 120
+			settings["grass_detail"] = "standard"
+			settings["shadows"] = true
+			settings["particles"] = true
+			settings["ball_trail"] = true
+			settings["perf_boost"] = false
+			settings["resolution_scale"] = 1.0
+		"pro_control":
+			settings["fps_limit"] = 240
+			settings["grass_detail"] = "arena_pro"
+			settings["shadows"] = false
+			settings["particles"] = true
+			settings["ball_trail"] = true
+			settings["perf_boost"] = true
+			settings["physics_profile"] = "pro_control"
+		"max_perf":
+			settings["fps_limit"] = 0
+			settings["grass_detail"] = "flat"
+			settings["shadows"] = false
+			settings["particles"] = false
+			settings["ball_trail"] = false
+			settings["perf_boost"] = true
+			settings["resolution_scale"] = 0.75
+		"power_saver":
+			settings["fps_limit"] = 60
+			settings["grass_detail"] = "flat"
+			settings["shadows"] = false
+			settings["particles"] = false
+			settings["ball_trail"] = false
+			settings["perf_boost"] = true
+		_:
+			settings["fps_limit"] = 60
+			settings["grass_detail"] = "hd_stadium"
+			settings["shadows"] = true
+			settings["particles"] = true
+			settings["ball_trail"] = true
+			settings["perf_boost"] = false
+			settings["resolution_scale"] = 1.0
+	save_settings()
 
 func _ready() -> void:
 	load_settings()
@@ -262,55 +365,85 @@ func get_effective_fps_label() -> String:
 
 func get_stadium(id: String) -> Dictionary:
 	var presets := {
-		"classic": {"label": "OpenHax Klasik", "w": 860.0, "h": 460.0, "px": 70.0, "py": 45.0, "pw": 720.0, "ph": 370.0, "gh": 68.0, "gd": 36.0},
-		"big": {"label": "Büyük Saha", "w": 1040.0, "h": 540.0, "px": 80.0, "py": 50.0, "pw": 880.0, "ph": 440.0, "gh": 82.0, "gd": 40.0},
-		"huge": {"label": "Dev Stadyum 4v4", "w": 1160.0, "h": 600.0, "px": 85.0, "py": 52.0, "pw": 990.0, "ph": 496.0, "gh": 90.0, "gd": 44.0},
-		"futsal": {"label": "Futsal", "w": 760.0, "h": 400.0, "px": 60.0, "py": 40.0, "pw": 640.0, "ph": 320.0, "gh": 58.0, "gd": 32.0},
-		"tiny": {"label": "Mini 1v1", "w": 660.0, "h": 350.0, "px": 54.0, "py": 36.0, "pw": 552.0, "ph": 278.0, "gh": 52.0, "gd": 28.0},
-		"long": {"label": "Uzun Koridor", "w": 1080.0, "h": 420.0, "px": 75.0, "py": 42.0, "pw": 930.0, "ph": 336.0, "gh": 66.0, "gd": 38.0},
-		"arena_3v3": {"label": "3v3 Orta Arena", "w": 960.0, "h": 500.0, "px": 74.0, "py": 46.0, "pw": 812.0, "ph": 408.0, "gh": 76.0, "gd": 38.0},
-		"mini_fast": {"label": "Hızlı 2v2", "w": 720.0, "h": 380.0, "px": 58.0, "py": 38.0, "pw": 604.0, "ph": 304.0, "gh": 56.0, "gd": 30.0},
-		"wide_wing": {"label": "Geniş Kanat", "w": 980.0, "h": 580.0, "px": 76.0, "py": 48.0, "pw": 828.0, "ph": 484.0, "gh": 84.0, "gd": 38.0},
-		"penalty_box": {"label": "Ceza Sahası", "w": 640.0, "h": 440.0, "px": 56.0, "py": 40.0, "pw": 528.0, "ph": 360.0, "gh": 78.0, "gd": 30.0},
-		"hbs_classic": {"label": "HBS: Classic", "w": 840.0, "h": 440.0, "px": 68.0, "py": 42.0, "pw": 704.0, "ph": 356.0, "gh": 64.0, "gd": 34.0},
-		"hbs_easy": {"label": "HBS: Easy", "w": 840.0, "h": 440.0, "px": 68.0, "py": 42.0, "pw": 704.0, "ph": 356.0, "gh": 84.0, "gd": 34.0},
-		"hbs_small": {"label": "HBS: Small", "w": 700.0, "h": 380.0, "px": 58.0, "py": 38.0, "pw": 584.0, "ph": 304.0, "gh": 58.0, "gd": 30.0},
-		"hbs_rounded": {"label": "HBS: Rounded", "w": 840.0, "h": 440.0, "px": 68.0, "py": 42.0, "pw": 704.0, "ph": 356.0, "gh": 64.0, "gd": 34.0},
-		"hbs_big": {"label": "HBS: Big", "w": 1100.0, "h": 540.0, "px": 82.0, "py": 50.0, "pw": 936.0, "ph": 440.0, "gh": 80.0, "gd": 40.0},
-		"hbs_big_easy": {"label": "HBS: Big Easy", "w": 1100.0, "h": 540.0, "px": 82.0, "py": 50.0, "pw": 936.0, "ph": 440.0, "gh": 96.0, "gd": 40.0},
-		"hbs_huge": {"label": "HBS: Huge", "w": 1340.0, "h": 680.0, "px": 92.0, "py": 56.0, "pw": 1156.0, "ph": 568.0, "gh": 96.0, "gd": 46.0}
+		"classic": {"label": "OpenHax Klasik (860x460)", "w": 860.0, "h": 460.0, "px": 30.0, "py": 30.0, "pw": 800.0, "ph": 400.0, "gh": 70.0, "gd": 22.0, "cr": 75.0},
+		"big": {"label": "Büyük Saha (1040x540)", "w": 1040.0, "h": 540.0, "px": 40.0, "py": 34.0, "pw": 960.0, "ph": 472.0, "gh": 84.0, "gd": 26.0, "cr": 86.0},
+		"huge": {"label": "Dev Stadyum 4v4 (1160x600)", "w": 1160.0, "h": 600.0, "px": 44.0, "py": 36.0, "pw": 1072.0, "ph": 528.0, "gh": 94.0, "gd": 28.0, "cr": 96.0},
+		"futsal": {"label": "Futsal (760x400)", "w": 760.0, "h": 400.0, "px": 30.0, "py": 28.0, "pw": 700.0, "ph": 344.0, "gh": 62.0, "gd": 22.0, "cr": 62.0},
+		"tiny": {"label": "Mini 1v1 (660x350)", "w": 660.0, "h": 350.0, "px": 28.0, "py": 26.0, "pw": 604.0, "ph": 298.0, "gh": 54.0, "gd": 20.0, "cr": 52.0},
+		"long": {"label": "Uzun Koridor (1080x420)", "w": 1080.0, "h": 420.0, "px": 36.0, "py": 28.0, "pw": 1008.0, "ph": 364.0, "gh": 68.0, "gd": 24.0, "cr": 70.0},
+		"arena_3v3": {"label": "3v3 Orta Arena (960x500)", "w": 960.0, "h": 500.0, "px": 36.0, "py": 32.0, "pw": 888.0, "ph": 436.0, "gh": 78.0, "gd": 24.0, "cr": 80.0},
+		"mini_fast": {"label": "Hızlı 2v2 (720x380)", "w": 720.0, "h": 380.0, "px": 28.0, "py": 26.0, "pw": 664.0, "ph": 328.0, "gh": 60.0, "gd": 20.0, "cr": 58.0},
+		"wide_wing": {"label": "Geniş Kanat (980x580)", "w": 980.0, "h": 580.0, "px": 38.0, "py": 34.0, "pw": 904.0, "ph": 512.0, "gh": 88.0, "gd": 26.0, "cr": 84.0},
+		"penalty_box": {"label": "Ceza Sahası / Şut (640x440)", "w": 640.0, "h": 440.0, "px": 28.0, "py": 28.0, "pw": 584.0, "ph": 384.0, "gh": 86.0, "gd": 22.0, "cr": 56.0},
+		"hbs_classic": {"label": "HBS: Classic (740x400)", "w": 800.0, "h": 460.0, "px": 30.0, "py": 30.0, "pw": 740.0, "ph": 400.0, "gh": 64.0, "gd": 22.0, "cr": 70.0},
+		"hbs_easy": {"label": "HBS: Easy (740x400)", "w": 800.0, "h": 460.0, "px": 30.0, "py": 30.0, "pw": 740.0, "ph": 400.0, "gh": 90.0, "gd": 22.0, "cr": 70.0},
+		"hbs_small": {"label": "HBS: Small (640x400)", "w": 700.0, "h": 460.0, "px": 30.0, "py": 30.0, "pw": 640.0, "ph": 400.0, "gh": 55.0, "gd": 20.0, "cr": 62.0},
+		"hbs_rounded": {"label": "HBS: Rounded (740x400)", "w": 800.0, "h": 460.0, "px": 30.0, "py": 30.0, "pw": 740.0, "ph": 400.0, "gh": 64.0, "gd": 22.0, "cr": 70.0},
+		"hbs_big": {"label": "HBS: Big (1100x540)", "w": 1180.0, "h": 600.0, "px": 40.0, "py": 30.0, "pw": 1100.0, "ph": 540.0, "gh": 80.0, "gd": 26.0, "cr": 88.0},
+		"hbs_big_easy": {"label": "HBS: Big Easy (1100x540)", "w": 1180.0, "h": 600.0, "px": 40.0, "py": 30.0, "pw": 1100.0, "ph": 540.0, "gh": 95.0, "gd": 26.0, "cr": 88.0},
+		"hbs_huge": {"label": "HBS: Huge (1400x700)", "w": 1480.0, "h": 760.0, "px": 40.0, "py": 30.0, "pw": 1400.0, "ph": 700.0, "gh": 100.0, "gd": 28.0, "cr": 105.0}
 	}
 	var st: Dictionary = presets.get(id, presets["classic"]).duplicate()
 	st["id"] = id if presets.has(id) else "classic"
-	var cy := float(st["py"]) + float(st["ph"]) * 0.5
+	var x0 := float(st["px"])
+	var y0 := float(st["py"])
+	var x1 := x0 + float(st["pw"])
+	var y1 := y0 + float(st["ph"])
+	var cy := y0 + float(st["ph"]) * 0.5
+	var gh := float(st["gh"])
+	var gd := float(st["gd"])
+	st["post_r"] = 7.5
+	st["post_bcoef"] = 0.75
 	st["posts"] = [
-		Vector2(float(st["px"]), cy - float(st["gh"])),
-		Vector2(float(st["px"]), cy + float(st["gh"])),
-		Vector2(float(st["px"]) + float(st["pw"]), cy - float(st["gh"])),
-		Vector2(float(st["px"]) + float(st["pw"]), cy + float(st["gh"]))
+		Vector2(x0, cy - gh),
+		Vector2(x0, cy + gh),
+		Vector2(x1, cy - gh),
+		Vector2(x1, cy + gh)
+	]
+	st["segments"] = [
+		{"a": Vector2(x0, y0), "b": Vector2(x1, y0), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x0, y1), "b": Vector2(x1, y1), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x0, y0), "b": Vector2(x0, cy - gh), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x0, cy + gh), "b": Vector2(x0, y1), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x1, y0), "b": Vector2(x1, cy - gh), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x1, cy + gh), "b": Vector2(x1, y1), "bcoef": 0.8, "mask": "ball"},
+		{"a": Vector2(x0 - gd, cy - gh), "b": Vector2(x0, cy - gh), "bcoef": 0.25, "mask": "both"},
+		{"a": Vector2(x0 - gd, cy + gh), "b": Vector2(x0, cy + gh), "bcoef": 0.25, "mask": "both"},
+		{"a": Vector2(x0 - gd, cy - gh), "b": Vector2(x0 - gd, cy + gh), "bcoef": 0.2, "mask": "both"},
+		{"a": Vector2(x1, cy - gh), "b": Vector2(x1 + gd, cy - gh), "bcoef": 0.25, "mask": "both"},
+		{"a": Vector2(x1, cy + gh), "b": Vector2(x1 + gd, cy + gh), "bcoef": 0.25, "mask": "both"},
+		{"a": Vector2(x1 + gd, cy - gh), "b": Vector2(x1 + gd, cy + gh), "bcoef": 0.2, "mask": "both"}
 	]
 	return st
 
 func get_physics_params(profile_name: String) -> Dictionary:
 	var table := {
-		"openhax": {"p_damp": 0.9735, "b_damp": 0.9915, "p_rest": 1.0, "pb_rest": 0.12, "bw_rest": 0.78, "accel": 0.125, "k_accel": 0.085, "k_imp": 5.4, "p_max": 3.33, "b_max": 11.2},
-		"classic_hax": {"p_damp": 0.96, "b_damp": 0.99, "p_rest": 0.5, "pb_rest": 0.35, "bw_rest": 0.8, "accel": 0.175, "k_accel": 0.12, "k_imp": 5.8, "p_max": 4.1, "b_max": 11.2},
-		"classic_hax_v2": {"p_damp": 0.964, "b_damp": 0.991, "p_rest": 0.55, "pb_rest": 0.38, "bw_rest": 0.82, "accel": 0.185, "k_accel": 0.13, "k_imp": 6.1, "p_max": 4.25, "b_max": 11.8},
-		"pro_control": {"p_damp": 0.962, "b_damp": 0.986, "p_rest": 0.35, "pb_rest": 0.18, "bw_rest": 0.72, "accel": 0.195, "k_accel": 0.14, "k_imp": 5.65, "p_max": 3.9, "b_max": 11.2},
-		"pro_control_v2": {"p_damp": 0.965, "b_damp": 0.988, "p_rest": 0.32, "pb_rest": 0.15, "bw_rest": 0.7, "accel": 0.21, "k_accel": 0.15, "k_imp": 5.9, "p_max": 4.1, "b_max": 11.8},
-		"pro_control_v3": {"p_damp": 0.968, "b_damp": 0.989, "p_rest": 0.28, "pb_rest": 0.12, "bw_rest": 0.68, "accel": 0.225, "k_accel": 0.16, "k_imp": 6.2, "p_max": 4.25, "b_max": 12.2},
-		"futsal": {"p_damp": 0.952, "b_damp": 0.983, "p_rest": 0.4, "pb_rest": 0.22, "bw_rest": 0.65, "accel": 0.205, "k_accel": 0.15, "k_imp": 5.9, "p_max": 4.0, "b_max": 11.6},
-		"big_arena": {"p_damp": 0.968, "b_damp": 0.993, "p_rest": 0.6, "pb_rest": 0.35, "bw_rest": 0.82, "accel": 0.19, "k_accel": 0.135, "k_imp": 6.6, "p_max": 4.6, "b_max": 13.0},
-		"turbo": {"p_damp": 0.965, "b_damp": 0.992, "p_rest": 0.7, "pb_rest": 0.45, "bw_rest": 0.85, "accel": 0.27, "k_accel": 0.2, "k_imp": 7.4, "p_max": 5.7, "b_max": 15.0},
-		"turbo_v2": {"p_damp": 0.97, "b_damp": 0.993, "p_rest": 0.75, "pb_rest": 0.5, "bw_rest": 0.88, "accel": 0.31, "k_accel": 0.22, "k_imp": 8.0, "p_max": 6.2, "b_max": 16.5},
-		"low_gravity": {"p_damp": 0.982, "b_damp": 0.996, "p_rest": 0.65, "pb_rest": 0.4, "bw_rest": 0.85, "accel": 0.145, "k_accel": 0.1, "k_imp": 6.2, "p_max": 4.4, "b_max": 13.0},
-		"real_soccer": {"p_damp": 0.962, "b_damp": 0.986, "p_rest": 0.45, "pb_rest": 0.28, "bw_rest": 0.68, "accel": 0.145, "k_accel": 0.1, "k_imp": 6.1, "p_max": 3.65, "b_max": 11.8},
-		"real_soccer_v2": {"p_damp": 0.965, "b_damp": 0.988, "p_rest": 0.42, "pb_rest": 0.24, "bw_rest": 0.65, "accel": 0.155, "k_accel": 0.11, "k_imp": 6.45, "p_max": 3.8, "b_max": 12.2},
-		"ice_hockey": {"p_damp": 0.992, "b_damp": 0.997, "p_rest": 0.85, "pb_rest": 0.45, "bw_rest": 0.9, "accel": 0.11, "k_accel": 0.08, "k_imp": 7.0, "p_max": 4.9, "b_max": 13.8},
-		"pinball": {"p_damp": 0.97, "b_damp": 0.996, "p_rest": 1.15, "pb_rest": 0.75, "bw_rest": 1.05, "accel": 0.19, "k_accel": 0.14, "k_imp": 6.6, "p_max": 4.3, "b_max": 13.5},
-		"heavy_tank": {"p_damp": 0.945, "b_damp": 0.984, "p_rest": 1.05, "pb_rest": 0.22, "bw_rest": 0.72, "accel": 0.115, "k_accel": 0.075, "k_imp": 6.9, "p_max": 2.85, "b_max": 11.5}
+		"openhax": {"p_invmass": 1.0, "b_invmass": 1.25, "p_damp": 0.973535, "b_damp": 0.991523, "p_rest": 1.0, "pb_rest": 0.1, "pw_rest": 0.0, "bw_rest": 0.78, "accel": 0.125, "k_accel": 0.095, "k_imp": 5.4, "p_max": 3.3333, "b_max": 10.8},
+		"classic_hax": {"p_invmass": 0.5, "b_invmass": 1.0, "p_damp": 0.96, "b_damp": 0.99, "p_rest": 0.5, "pb_rest": 0.35, "pw_rest": 0.0, "bw_rest": 0.8, "accel": 0.175, "k_accel": 0.12, "k_imp": 5.8, "p_max": 4.1, "b_max": 11.2},
+		"classic_hax_v2": {"p_invmass": 0.5, "b_invmass": 1.0, "p_damp": 0.964, "b_damp": 0.991, "p_rest": 0.5, "pb_rest": 0.32, "pw_rest": 0.0, "bw_rest": 0.82, "accel": 0.185, "k_accel": 0.128, "k_imp": 6.05, "p_max": 4.25, "b_max": 11.6},
+		"pro_control": {"p_invmass": 0.8, "b_invmass": 1.25, "p_damp": 0.96, "b_damp": 0.986, "p_rest": 0.6, "pb_rest": 0.04, "pw_rest": 0.0, "bw_rest": 0.72, "accel": 0.16, "k_accel": 0.12, "k_imp": 5.8, "p_max": 3.8, "b_max": 11.0},
+		"pro_control_v2": {"p_invmass": 0.55, "b_invmass": 1.05, "p_damp": 0.962, "b_damp": 0.985, "p_rest": 0.55, "pb_rest": 0.14, "pw_rest": 0.0, "bw_rest": 0.72, "accel": 0.195, "k_accel": 0.135, "k_imp": 5.9, "p_max": 4.0, "b_max": 11.4},
+		"pro_control_v3": {"p_invmass": 0.5, "b_invmass": 1.1, "p_damp": 0.966, "b_damp": 0.982, "p_rest": 0.5, "pb_rest": 0.08, "pw_rest": 0.0, "bw_rest": 0.68, "accel": 0.21, "k_accel": 0.15, "k_imp": 6.2, "p_max": 4.15, "b_max": 11.8},
+		"futsal": {"p_invmass": 0.9, "b_invmass": 1.2, "p_damp": 0.955, "b_damp": 0.982, "p_rest": 0.75, "pb_rest": 0.08, "pw_rest": 0.0, "bw_rest": 0.76, "accel": 0.19, "k_accel": 0.14, "k_imp": 6.4, "p_max": 4.1, "b_max": 11.8},
+		"big_arena": {"p_invmass": 0.7, "b_invmass": 1.25, "p_damp": 0.962, "b_damp": 0.993, "p_rest": 0.8, "pb_rest": 0.2, "pw_rest": 0.0, "bw_rest": 0.82, "accel": 0.21, "k_accel": 0.15, "k_imp": 7.2, "p_max": 4.6, "b_max": 13.0},
+		"turbo": {"p_invmass": 1.0, "b_invmass": 1.25, "p_damp": 0.955, "b_damp": 0.991523, "p_rest": 0.9, "pb_rest": 0.2, "pw_rest": 0.0, "bw_rest": 0.82, "accel": 0.23, "k_accel": 0.17, "k_imp": 6.8, "p_max": 5.0, "b_max": 13.0},
+		"turbo_v2": {"p_invmass": 0.45, "b_invmass": 1.25, "p_damp": 0.972, "b_damp": 0.994, "p_rest": 0.95, "pb_rest": 0.28, "pw_rest": 0.0, "bw_rest": 0.88, "accel": 0.26, "k_accel": 0.19, "k_imp": 7.4, "p_max": 5.5, "b_max": 14.2},
+		"low_gravity": {"p_invmass": 1.0, "b_invmass": 1.25, "p_damp": 0.985, "b_damp": 0.996, "p_rest": 1.0, "pb_rest": 0.45, "pw_rest": 0.1, "bw_rest": 0.92, "accel": 0.11, "k_accel": 0.09, "k_imp": 6.2, "p_max": 4.4, "b_max": 12.5},
+		"real_soccer": {"p_invmass": 0.7, "b_invmass": 0.85, "p_damp": 0.962, "b_damp": 0.986, "p_rest": 0.45, "pb_rest": 0.28, "pw_rest": 0.0, "bw_rest": 0.68, "accel": 0.145, "k_accel": 0.1, "k_imp": 6.1, "p_max": 3.65, "b_max": 11.8},
+		"real_soccer_v2": {"p_invmass": 0.65, "b_invmass": 0.8, "p_damp": 0.965, "b_damp": 0.988, "p_rest": 0.42, "pb_rest": 0.24, "pw_rest": 0.0, "bw_rest": 0.65, "accel": 0.155, "k_accel": 0.11, "k_imp": 6.45, "p_max": 3.8, "b_max": 12.2},
+		"ice_hockey": {"p_invmass": 0.65, "b_invmass": 1.3, "p_damp": 0.992, "b_damp": 0.997, "p_rest": 0.85, "pb_rest": 0.45, "pw_rest": 0.25, "bw_rest": 0.9, "accel": 0.11, "k_accel": 0.08, "k_imp": 7.0, "p_max": 4.9, "b_max": 13.8},
+		"pinball": {"p_invmass": 0.8, "b_invmass": 1.5, "p_damp": 0.97, "b_damp": 0.996, "p_rest": 1.15, "pb_rest": 0.75, "pw_rest": 0.4, "bw_rest": 1.05, "accel": 0.19, "k_accel": 0.14, "k_imp": 6.6, "p_max": 4.3, "b_max": 13.5},
+		"heavy_tank": {"p_invmass": 0.35, "b_invmass": 0.75, "p_damp": 0.945, "b_damp": 0.984, "p_rest": 1.05, "pb_rest": 0.22, "pw_rest": 0.0, "bw_rest": 0.72, "accel": 0.115, "k_accel": 0.075, "k_imp": 6.9, "p_max": 2.85, "b_max": 11.5}
 	}
-	return table.get(profile_name, table["openhax"])
+	var base: Dictionary = table.get(profile_name, table["openhax"]).duplicate()
+	if bool(settings.get("custom_physics_enabled", false)):
+		var ctrl := clampf(float(settings.get("custom_ball_control", 90.0)), 20.0, 100.0)
+		base["pb_rest"] = lerpf(0.65, 0.02, (ctrl - 20.0) / 80.0)
+		base["b_damp"] = clampf(float(settings.get("custom_ball_damping", base["b_damp"])), 0.975, 0.996)
+		base["k_imp"] = clampf(float(settings.get("custom_kick_power", base["k_imp"])), 3.5, 8.5)
+		base["p_max"] = clampf(float(settings.get("custom_player_speed", base["p_max"])), 2.8, 5.5)
+		base["bw_rest"] = clampf(float(settings.get("custom_wall_bounce", base["bw_rest"])), 0.40, 0.95)
+	return base
 
 func load_settings() -> void:
 	var cfg := ConfigFile.new()
