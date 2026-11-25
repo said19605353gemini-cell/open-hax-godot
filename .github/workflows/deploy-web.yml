@@ -23,6 +23,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Godot Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            ln -sfn /root/.local/share/godot/export_templates ~/.local/share/godot/export_templates
+          elif [ -d /root/.local/share/godot/templates ]; then
+            ln -sfn /root/.local/share/godot/templates ~/.local/share/godot/export_templates
+          fi
+
       - name: Export Web (Single-threaded for GitHub Pages)
         run: |
           mkdir -p build/web
