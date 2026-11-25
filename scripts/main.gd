@@ -149,14 +149,20 @@ func _on_btn_create_room_pressed() -> void:
 	GameData.settings["room_max_fps"] = int(create_fps.value)
 	GameData.save_settings()
 	if kind == "host":
-		var peer := ENetMultiplayerPeer.new()
-		peer.create_server(7777, 16)
-		multiplayer.multiplayer_peer = peer
+		if OS.has_feature("web"):
+			_on_chat_msg("Sistem", "Web tarayıcıda P2P Host yerine Çevrimdışı Bot / 2 Kişilik Yerel mod açıldı (ENet yalnızca Masaüstü sürümde çalışır).", true)
+			kind = "offline"
+		else:
+			var peer := ENetMultiplayerPeer.new()
+			peer.create_server(7777, 16)
+			multiplayer.multiplayer_peer = peer
 	world.start_room(kind, create_name.text, st_id, bp, 5, 180, pu)
 	chat_log.clear()
 	_switch_screen("room")
 
 func _on_btn_join_ip_pressed() -> void:
+	if OS.has_feature("web"):
+		return
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(join_ip.text.strip_edges(), int(join_port.text))
 	if err == OK:
