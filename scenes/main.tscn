@@ -1,0 +1,408 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.24, 0.31, 0.21, 1)
+
+[node name="RootVBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 0
+
+[node name="TopBar" type="PanelContainer" parent="RootVBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="RootVBox/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Brand" type="Label" parent="RootVBox/TopBar/HBox"]
+layout_mode = 2
+text = "  ⚽ OpenHax Godot 2D"
+
+[node name="TopbarScore" type="HBoxContainer" parent="RootVBox/TopBar/HBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="ScoreLbl" type="Label" parent="RootVBox/TopBar/HBox/TopbarScore"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0  -  0"
+
+[node name="TimerLbl" type="Label" parent="RootVBox/TopBar/HBox/TopbarScore"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "  00:00"
+
+[node name="FpsHud" type="Label" parent="RootVBox/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "60 FPS"
+
+[node name="LangSelect" type="OptionButton" parent="RootVBox/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BtnSettings" type="Button" parent="RootVBox/TopBar/HBox"]
+layout_mode = 2
+text = "⚙️ Ayarlar"
+
+[node name="ViewAuth" type="CenterContainer" parent="RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Card" type="PanelContainer" parent="RootVBox/ViewAuth"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ViewAuth/Card"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="RootVBox/ViewAuth/Card/VBox"]
+layout_mode = 2
+text = "OpenHax Godot 2D'ye Hoş Geldin"
+horizontal_alignment = 1
+
+[node name="AuthNick" type="LineEdit" parent="RootVBox/ViewAuth/Card/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Kullanıcı Adı"
+
+[node name="AuthAvatar" type="LineEdit" parent="RootVBox/ViewAuth/Card/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Avatar (:), 10, ★)"
+
+[node name="AuthCountry" type="OptionButton" parent="RootVBox/ViewAuth/Card/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BtnAuthEnter" type="Button" parent="RootVBox/ViewAuth/Card/VBox"]
+layout_mode = 2
+text = "Lobiye Gir"
+
+[node name="AuthStats" type="Label" parent="RootVBox/ViewAuth/Card/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="ViewLobby" type="CenterContainer" parent="RootVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Grid" type="HBoxContainer" parent="RootVBox/ViewLobby"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="JoinCard" type="PanelContainer" parent="RootVBox/ViewLobby/Grid"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ViewLobby/Grid/JoinCard"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Lbl" type="Label" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+layout_mode = 2
+text = "Odaya Katıl (IP / LAN)"
+
+[node name="JoinIp" type="LineEdit" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "127.0.0.1"
+placeholder_text = "Sunucu IP"
+
+[node name="JoinPort" type="LineEdit" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "7777"
+placeholder_text = "Port"
+
+[node name="BtnJoinIp" type="Button" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+layout_mode = 2
+text = "IP ile Katıl"
+
+[node name="CreateCard" type="PanelContainer" parent="RootVBox/ViewLobby/Grid"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ViewLobby/Grid/CreateCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Lbl" type="Label" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+layout_mode = 2
+text = "Yeni Oda Oluştur"
+
+[node name="CreateName" type="LineEdit" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "OpenHax Oda"
+placeholder_text = "Oda Adı"
+
+[node name="CreateType" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreateStadium" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreateBots" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreateBotDiff" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreatePhysics" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreatePowerup" type="OptionButton" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreateFps" type="SpinBox" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+prefix = "Oda FPS (0=∞):"
+
+[node name="BtnCreateRoom" type="Button" parent="RootVBox/ViewLobby/Grid/CreateCard/VBox"]
+layout_mode = 2
+text = "Oda Oluştur ve Oyuna Gir"
+
+[node name="ViewRoom" type="VBoxContainer" parent="RootVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RoomBar" type="HBoxContainer" parent="RootVBox/ViewRoom"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnAddRed" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "+ Kırmızı Bot"
+
+[node name="BtnAddBlue" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "+ Mavi Bot"
+
+[node name="BtnRemBot" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "- Bot"
+
+[node name="BtnClearBots" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "Botları Temizle"
+
+[node name="BtnPause" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "Duraklat (P)"
+
+[node name="BtnReset" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "Sıfırla (R)"
+
+[node name="BtnTeams" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "Takımlar (ESC)"
+
+[node name="BtnLeave" type="Button" parent="RootVBox/ViewRoom/RoomBar"]
+layout_mode = 2
+text = "Odadan Çık"
+
+[node name="PitchContainer" type="Control" parent="RootVBox/ViewRoom"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GoalBanner" type="Label" parent="RootVBox/ViewRoom/PitchContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "GOL!"
+
+[node name="PauseOverlay" type="CenterContainer" parent="RootVBox/ViewRoom/PitchContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="PauseCard" type="PanelContainer" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox"]
+layout_mode = 2
+text = "OYUN DURAKLATILDI (P)"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox"]
+layout_mode = 2
+
+[node name="BtnResume" type="Button" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox"]
+layout_mode = 2
+text = "▶ Devam Et"
+
+[node name="BtnPauseReset" type="Button" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox"]
+layout_mode = 2
+text = "🔄 Sıfırla"
+
+[node name="BtnPauseLeave" type="Button" parent="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox"]
+layout_mode = 2
+text = "🚪 Çık"
+
+[node name="ChatBar" type="HBoxContainer" parent="RootVBox/ViewRoom"]
+layout_mode = 2
+
+[node name="ChatLog" type="RichTextLabel" parent="RootVBox/ViewRoom/ChatBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+scroll_following = true
+
+[node name="ChatInput" type="LineEdit" parent="RootVBox/ViewRoom/ChatBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+placeholder_text = "Mesaj yaz..."
+
+[node name="BtnChatSend" type="Button" parent="RootVBox/ViewRoom/ChatBar"]
+layout_mode = 2
+text = "Gönder"
+
+[node name="SettingsModal" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="SettingsModal"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="SettingsModal/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Lbl" type="Label" parent="SettingsModal/Panel/VBox"]
+layout_mode = 2
+text = "⚙️ Performans & Grafik Ayarları"
+
+[node name="SetFps" type="SpinBox" parent="SettingsModal/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+value = 60.0
+prefix = "Kişisel FPS (0=∞):"
+
+[node name="SetRoomFps" type="SpinBox" parent="SettingsModal/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+prefix = "Oda FPS (0=∞):"
+
+[node name="SetGrass" type="OptionButton" parent="SettingsModal/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SetPerfBoost" type="CheckBox" parent="SettingsModal/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Performans Modu (Hafif Çizim)"
+
+[node name="SetSound" type="CheckBox" parent="SettingsModal/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Ses Efektleri"
+
+[node name="BtnApplySettings" type="Button" parent="SettingsModal/Panel/VBox"]
+layout_mode = 2
+text = "Kaydet ve Kapat"
+
+[node name="TeamsModal" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="TeamsModal"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="TeamsModal/Panel"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="TeamsModal/Panel/VBox"]
+layout_mode = 2
+text = "Oda & Takım Kontrolleri (ESC)"
+
+[node name="BtnTeamsClose" type="Button" parent="TeamsModal/Panel/VBox"]
+layout_mode = 2
+text = "Kapat"
+
+[connection signal="pressed" from="RootVBox/TopBar/HBox/BtnSettings" to="." method="_on_btn_settings_pressed"]
+[connection signal="pressed" from="RootVBox/ViewAuth/Card/VBox/BtnAuthEnter" to="." method="_on_btn_auth_enter_pressed"]
+[connection signal="pressed" from="RootVBox/ViewLobby/Grid/JoinCard/VBox/BtnJoinIp" to="." method="_on_btn_join_ip_pressed"]
+[connection signal="pressed" from="RootVBox/ViewLobby/Grid/CreateCard/VBox/BtnCreateRoom" to="." method="_on_btn_create_room_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnAddRed" to="." method="_on_btn_add_red_bot"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnAddBlue" to="." method="_on_btn_add_blue_bot"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnRemBot" to="." method="_on_btn_rem_bot"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnClearBots" to="." method="_on_btn_clear_bots"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnPause" to="." method="_on_btn_pause_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnReset" to="." method="_on_btn_reset_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnTeams" to="." method="_on_btn_teams_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnLeave" to="." method="_on_btn_leave_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox/BtnResume" to="." method="_on_btn_pause_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox/BtnPauseReset" to="." method="_on_btn_reset_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/PitchContainer/PauseOverlay/PauseCard/VBox/HBox/BtnPauseLeave" to="." method="_on_btn_leave_pressed"]
+[connection signal="pressed" from="RootVBox/ViewRoom/ChatBar/BtnChatSend" to="." method="_on_chat_send_pressed"]
+[connection signal="pressed" from="SettingsModal/Panel/VBox/BtnApplySettings" to="." method="_on_btn_apply_settings_pressed"]
+[connection signal="pressed" from="TeamsModal/Panel/VBox/BtnTeamsClose" to="." method="_on_btn_teams_pressed"]
