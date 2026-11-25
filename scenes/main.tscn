@@ -118,8 +118,46 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_constants/separation = 16
 
+[node name="GlobalChatCard" type="PanelContainer" parent="RootVBox/ViewLobby/Grid"]
+custom_minimum_size = Vector2(280, 360)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ViewLobby/Grid/GlobalChatCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Lbl" type="Label" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox"]
+layout_mode = 2
+text = "💬 Genel Sohbet & 🏆 Liderler"
+
+[node name="LeaderboardLbl" type="Label" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Liderlik yükleniyor..."
+autowrap_mode = 2
+
+[node name="GlobalChatLog" type="RichTextLabel" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_following = true
+
+[node name="Row" type="HBoxContainer" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox"]
+layout_mode = 2
+
+[node name="GlobalChatInput" type="LineEdit" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Genel sohbete yaz..."
+
+[node name="BtnGlobalSend" type="Button" parent="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox/Row"]
+layout_mode = 2
+text = "Gönder"
+
 [node name="JoinCard" type="PanelContainer" parent="RootVBox/ViewLobby/Grid"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(340, 360)
 layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="RootVBox/ViewLobby/Grid/JoinCard"]
@@ -128,7 +166,17 @@ theme_override_constants/separation = 8
 
 [node name="Lbl" type="Label" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
 layout_mode = 2
-text = "Odaya Katıl (IP / LAN)"
+text = "Odalar / Sunucular (Firebase + LAN)"
+
+[node name="RoomsList" type="ItemList" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LobbyStatus" type="Label" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
 
 [node name="JoinIp" type="LineEdit" parent="RootVBox/ViewLobby/Grid/JoinCard/VBox"]
 unique_name_in_owner = true
@@ -390,6 +438,7 @@ text = "Kapat"
 
 [connection signal="pressed" from="RootVBox/TopBar/HBox/BtnSettings" to="." method="_on_btn_settings_pressed"]
 [connection signal="pressed" from="RootVBox/ViewAuth/Card/VBox/BtnAuthEnter" to="." method="_on_btn_auth_enter_pressed"]
+[connection signal="pressed" from="RootVBox/ViewLobby/Grid/GlobalChatCard/VBox/Row/BtnGlobalSend" to="." method="_on_btn_global_send_pressed"]
 [connection signal="pressed" from="RootVBox/ViewLobby/Grid/JoinCard/VBox/BtnJoinIp" to="." method="_on_btn_join_ip_pressed"]
 [connection signal="pressed" from="RootVBox/ViewLobby/Grid/CreateCard/VBox/BtnCreateRoom" to="." method="_on_btn_create_room_pressed"]
 [connection signal="pressed" from="RootVBox/ViewRoom/RoomBar/BtnAddRed" to="." method="_on_btn_add_red_bot"]

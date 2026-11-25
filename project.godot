@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.3", "Forward Plus")
 [autoload]
 
 GameData="*res://scripts/game_data.gd"
+FirebaseService="*res://scripts/firebase_service.gd"
 
 [display]
 
